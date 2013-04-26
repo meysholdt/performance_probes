@@ -18,10 +18,11 @@ public class EMFResource {
 
 	private final static ResourceSetTable T_RESOURCESET = new ResourceSetTable();
 
+	private final static int T_RESOURCESET_NO_RS = T_RESOURCESET.createRow();
+
 	private static final class ResourceSetTable extends Table {
 		private final StringColumn resourceSet = new StringColumn("ResourceSet");
-		private final StringColumn context = new StringColumn(
-				"XtextClasspathContext");
+		private final StringColumn context = new StringColumn("XtextClasspathContext");
 
 		public ResourceSetTable() {
 			super("EMF ResourceSets", Table.MASK_FOR_POINT_EVENTS);
@@ -38,8 +39,7 @@ public class EMFResource {
 		private final StringColumn op = new StringColumn("operation");
 
 		public ResourceTable() {
-			super("EMF Resources", Table.LASTING_EVENTS
-					| Table.RECORD_STACKTRACE_ON_ROW_CREATION);
+			super("EMF Resources", Table.MASK_FOR_SINGLE_METHOD_CALL_LASTING_EVENTS | Table.RECORD_THREAD_CPU_TIME);
 		}
 	}
 
@@ -56,8 +56,7 @@ public class EMFResource {
 
 	@MethodPattern("org.eclipse.xtext.resource.XtextResourceSet:setClasspathURIContext(java.lang.Object)")
 	public static class ResourceSetSetClasspathContext {
-		public static void onEnter(@This final ResourceSet rs,
-				@Param(1) Object ctx) {
+		public static void onEnter(@This final ResourceSet rs, @Param(1) Object ctx) {
 			synchronized (rs) {
 				int i = getResourceSetRwo(rs);
 				T_RESOURCESET.context.setValue(i, ctxToStr(ctx));
@@ -66,8 +65,7 @@ public class EMFResource {
 
 		private static String ctxToStr(Object ctx) {
 			if (ctx instanceof IJavaProject)
-				return ctx.getClass().getSimpleName() + "("
-						+ ((IJavaProject) ctx).getProject().getName() + ")";
+				return ctx.getClass().getSimpleName() + "(" + ((IJavaProject) ctx).getProject().getName() + ")";
 			if (ctx != null)
 				return ctx.getClass().getSimpleName();
 			return "null";
@@ -87,6 +85,8 @@ public class EMFResource {
 	// }
 
 	private static int getResourceSetRwo(ResourceSet rs) {
+		if (rs == null)
+			return T_RESOURCESET_NO_RS;
 		synchronized (rs) {
 			int i = rs2rwo.get(rs);
 			if (i == Table.NO_ROW) {
@@ -99,8 +99,7 @@ public class EMFResource {
 	}
 
 	private static String resourceSetToStr(ResourceSet rs) {
-		return rs.getClass().getSimpleName() + "@"
-				+ Integer.toHexString(System.identityHashCode(rs));
+		return rs.getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(rs));
 	}
 
 	@MethodPattern("org.eclipse.emf.ecore.resource.impl.ResourceImpl:load(java.io.InputStream, java.util.Map)")
@@ -114,10 +113,8 @@ public class EMFResource {
 				int rsRow = getResourceSetRwo(resource.getResourceSet());
 				int rRow = T_RESOURCE.createRow();
 				T_RESOURCE.rs.setValue(rRow, rsRow);
-				T_RESOURCE.instance.setValue(rRow,
-						Integer.toHexString(System.identityHashCode(resource)));
-				T_RESOURCE.type.setValue(rRow, resource.getClass()
-						.getSimpleName());
+				T_RESOURCE.instance.setValue(rRow, Integer.toHexString(System.identityHashCode(resource)));
+				T_RESOURCE.type.setValue(rRow, resource.getClass().getSimpleName());
 				T_RESOURCE.uri.setValue(rRow, resource.getURI().toString());
 				T_RESOURCE.op.setValue(rRow, "load()");
 				return rRow;
@@ -125,7 +122,7 @@ public class EMFResource {
 		}
 
 		public static void onReturn(@OnEnterResult final int readRowIndex) {
-			if (readRowIndex > 0)
+			if (readRowIndex >= 0)
 				T_RESOURCE.closeRow(readRowIndex);
 		}
 

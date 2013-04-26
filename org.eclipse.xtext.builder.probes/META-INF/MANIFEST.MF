@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Probes
+Bundle-SymbolicName: org.eclipse.xtext.builder.probes;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Fragment-Host: org.eclipse.xtext.builder;bundle-version="2.4.2"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: com.yourkit.lib;bundle-version="1.0.0"
+Export-Package: org.eclipse.xtext.builder.probes
