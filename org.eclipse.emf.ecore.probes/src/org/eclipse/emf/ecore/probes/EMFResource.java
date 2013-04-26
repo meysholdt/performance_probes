@@ -55,7 +55,7 @@ public class EMFResource {
 	}
 
 	@MethodPattern("org.eclipse.xtext.resource.XtextResourceSet:setClasspathURIContext(java.lang.Object)")
-	public static class ResourceSetSetClasspathCntext {
+	public static class ResourceSetSetClasspathContext {
 		public static void onEnter(@This final ResourceSet rs,
 				@Param(1) Object ctx) {
 			synchronized (rs) {
