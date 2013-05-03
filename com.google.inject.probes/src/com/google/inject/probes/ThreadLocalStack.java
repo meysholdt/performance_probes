@@ -14,7 +14,7 @@ public class ThreadLocalStack<T> {
 
 	public T peek() {
 		Stack<T> stack = local.get();
-		if (stack == null)
+		if (stack == null || stack.isEmpty())
 			return null;
 		return stack.peek();
 	}
